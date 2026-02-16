@@ -4,18 +4,51 @@
   box-sizing: border-box;
 }
 
+/* ========== Light Mode (default) ========== */
 :root {
-  --bg: #2d2d3f;
-  --bg-light: #35354a;
-  --surface: #3a3a52;
+  --bg: #e0e5ec;
+  --bg-light: #e8ecf1;
+  --surface: #d1d9e6;
   --primary: #7c5cfc;
   --primary-hover: #6a48e0;
   --accent: #ff6b9d;
+  --text: #2d3436;
+  --text-muted: #636e72;
+  --board-color: #dcb35c;
+  --board-shadow: #c9a34e;
+  --board-highlight: #e8c96a;
+
+  /* Neumorphic shadows — light mode */
+  --neu-shadow:
+    6px 6px 12px rgba(163, 177, 198, 0.6),
+    -6px -6px 12px rgba(255, 255, 255, 0.8);
+  --neu-shadow-sm:
+    3px 3px 6px rgba(163, 177, 198, 0.5),
+    -3px -3px 6px rgba(255, 255, 255, 0.7);
+  --neu-inset:
+    inset 3px 3px 6px rgba(163, 177, 198, 0.5),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.7);
+  --neu-flat:
+    2px 2px 5px rgba(163, 177, 198, 0.4),
+    -2px -2px 5px rgba(255, 255, 255, 0.6);
+
+  /* Board neumorphic */
+  --board-neu-outer:
+    8px 8px 16px rgba(163, 177, 198, 0.7),
+    -8px -8px 16px rgba(255, 255, 255, 0.8);
+  --board-neu-inner:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* ========== Dark Mode ========== */
+[data-theme="dark"] {
+  --bg: #2d2d3f;
+  --bg-light: #35354a;
+  --surface: #3a3a52;
   --text: #e8e8f0;
   --text-muted: #9a9ab0;
-  --board-color: #dcb35c;
 
-  /* Neumorphic shadows */
   --neu-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.4),
     -6px -6px 12px rgba(255, 255, 255, 0.04);
@@ -28,6 +61,13 @@
   --neu-flat:
     2px 2px 5px rgba(0, 0, 0, 0.3),
     -2px -2px 5px rgba(255, 255, 255, 0.03);
+
+  --board-neu-outer:
+    8px 8px 16px rgba(0, 0, 0, 0.5),
+    -8px -8px 16px rgba(255, 255, 255, 0.04);
+  --board-neu-inner:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.03);
 }
 
 body {
@@ -36,6 +76,7 @@ body {
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
 }
 
 a { color: var(--primary); text-decoration: none; }
@@ -49,6 +90,7 @@ a:hover { color: var(--accent); }
   padding: 1rem 2rem;
   background: var(--bg);
   box-shadow: var(--neu-shadow-sm);
+  transition: background 0.3s, box-shadow 0.3s;
 }
 .navbar-left {
   display: flex;
@@ -87,6 +129,31 @@ a:hover { color: var(--accent); }
 .navbar-user {
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+/* ========== Theme Toggle ========== */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1.1rem;
+  box-shadow: var(--neu-shadow-sm);
+  transition: all 0.25s;
+}
+.theme-toggle:hover {
+  box-shadow: var(--neu-flat);
+  transform: translateY(-1px);
+}
+.theme-toggle:active {
+  box-shadow: var(--neu-inset);
+  transform: translateY(0);
 }
 
 /* ========== Container ========== */
@@ -177,6 +244,7 @@ a:hover { color: var(--accent); }
   flex-direction: column;
   gap: 1.2rem;
   box-shadow: var(--neu-shadow);
+  transition: background 0.3s, box-shadow 0.3s;
 }
 .auth-form h2 {
   text-align: center;
@@ -192,7 +260,7 @@ a:hover { color: var(--accent); }
   font-size: 1rem;
   box-shadow: var(--neu-inset);
   outline: none;
-  transition: box-shadow 0.25s;
+  transition: box-shadow 0.25s, background 0.3s;
 }
 .auth-form input:focus {
   box-shadow:
@@ -239,6 +307,7 @@ a:hover { color: var(--accent); }
   padding: 1.2rem 1.5rem;
   border-radius: 16px;
   box-shadow: var(--neu-shadow);
+  transition: background 0.3s, box-shadow 0.3s;
 }
 .create-game-form label {
   display: flex;
@@ -257,6 +326,7 @@ a:hover { color: var(--accent); }
   box-shadow: var(--neu-inset);
   outline: none;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
 /* ========== Game Table ========== */
@@ -277,6 +347,7 @@ a:hover { color: var(--accent); }
 .game-table td {
   padding: 0.8rem 1rem;
   background: var(--bg-light);
+  transition: background 0.3s;
 }
 .game-table tr td:first-child { border-radius: 12px 0 0 12px; }
 .game-table tr td:last-child { border-radius: 0 12px 12px 0; }
@@ -300,6 +371,7 @@ a:hover { color: var(--accent); }
   box-shadow: var(--neu-shadow);
   color: var(--text-muted);
   font-weight: 500;
+  transition: background 0.3s;
 }
 
 .game-layout {
@@ -311,12 +383,22 @@ a:hover { color: var(--accent); }
   .game-layout { flex-direction: column; align-items: center; }
 }
 
-/* ========== Board ========== */
+/* ========== Board (Neumorphic) ========== */
+.board-container {
+  border-radius: 20px;
+  padding: 12px;
+  background: var(--bg);
+  box-shadow: var(--board-neu-outer);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.board-inner {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--board-neu-inner);
+}
 .go-board {
   display: block;
   width: 100%;
-  border-radius: 16px;
-  box-shadow: var(--neu-shadow);
 }
 
 /* ========== Game Info Panel ========== */
@@ -326,6 +408,7 @@ a:hover { color: var(--accent); }
   border-radius: 20px;
   padding: 1.5rem;
   box-shadow: var(--neu-shadow);
+  transition: background 0.3s, box-shadow 0.3s;
 }
 .players {
   display: flex;
@@ -372,6 +455,7 @@ a:hover { color: var(--accent); }
   background: var(--bg);
   box-shadow: var(--neu-inset);
   font-size: 0.95rem;
+  transition: background 0.3s;
 }
 .game-actions {
   display: flex;
@@ -385,6 +469,7 @@ a:hover { color: var(--accent); }
   border-radius: 12px;
   background: var(--bg);
   box-shadow: var(--neu-inset);
+  transition: background 0.3s;
 }
 .game-result h3 {
   margin-bottom: 0.5rem;
@@ -406,6 +491,7 @@ a:hover { color: var(--accent); }
   border-radius: 16px;
   padding: 1.5rem 1.8rem;
   box-shadow: var(--neu-shadow);
+  transition: background 0.3s, box-shadow 0.3s;
 }
 .rules-section h3 {
   margin-bottom: 0.6rem;
@@ -435,6 +521,7 @@ a:hover { color: var(--accent); }
   padding: 1rem;
   text-align: center;
   box-shadow: var(--neu-inset);
+  transition: background 0.3s;
 }
 .board-size-card strong {
   font-size: 1.1rem;

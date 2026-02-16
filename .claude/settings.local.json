@@ -6,7 +6,8 @@
       "Bash(node:*)",
       "Bash(npx vite build:*)",
       "Bash(npx kill-port:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }
