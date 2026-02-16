@@ -1,0 +1,449 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #2d2d3f;
+  --bg-light: #35354a;
+  --surface: #3a3a52;
+  --primary: #7c5cfc;
+  --primary-hover: #6a48e0;
+  --accent: #ff6b9d;
+  --text: #e8e8f0;
+  --text-muted: #9a9ab0;
+  --board-color: #dcb35c;
+
+  /* Neumorphic shadows */
+  --neu-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.4),
+    -6px -6px 12px rgba(255, 255, 255, 0.04);
+  --neu-shadow-sm:
+    3px 3px 6px rgba(0, 0, 0, 0.35),
+    -3px -3px 6px rgba(255, 255, 255, 0.03);
+  --neu-inset:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.35),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.03);
+  --neu-flat:
+    2px 2px 5px rgba(0, 0, 0, 0.3),
+    -2px -2px 5px rgba(255, 255, 255, 0.03);
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { color: var(--accent); }
+
+/* ========== Navbar ========== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: var(--bg);
+  box-shadow: var(--neu-shadow-sm);
+}
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.navbar-link {
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--text-muted);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  transition: all 0.25s;
+}
+.navbar-link:hover {
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--neu-flat);
+}
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.navbar-user {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ========== Container ========== */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* ========== Buttons ========== */
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: var(--neu-shadow-sm);
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  box-shadow: var(--neu-flat);
+  transform: translateY(-1px);
+}
+.btn:active {
+  box-shadow: var(--neu-inset);
+  transform: translateY(0);
+}
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--neu-flat);
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #6a48e0);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #6a48e0, #5838c8);
+}
+.btn-danger {
+  background: linear-gradient(135deg, #c0392b, #96281b);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: linear-gradient(135deg, #a93226, #7d2118);
+}
+.btn-small { padding: 0.35rem 0.8rem; font-size: 0.8rem; border-radius: 8px; }
+.btn-outline {
+  background: transparent;
+  box-shadow: none;
+  border: 1px solid var(--text-muted);
+}
+.btn-outline:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ========== Auth Pages ========== */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 75vh;
+}
+.auth-page h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.auth-form {
+  background: var(--bg-light);
+  padding: 2.5rem;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow: var(--neu-shadow);
+}
+.auth-form h2 {
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.auth-form input {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  box-shadow: var(--neu-inset);
+  outline: none;
+  transition: box-shadow 0.25s;
+}
+.auth-form input:focus {
+  box-shadow:
+    var(--neu-inset),
+    0 0 0 2px var(--primary);
+}
+.auth-form input::placeholder {
+  color: var(--text-muted);
+}
+.auth-form p {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ========== Error / Toast ========== */
+.error { color: var(--accent); font-size: 0.9rem; }
+.toast {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #c0392b, #96281b);
+  padding: 0.7rem 1.5rem;
+  border-radius: 14px;
+  z-index: 100;
+  color: white;
+  box-shadow: var(--neu-shadow);
+  font-weight: 500;
+}
+.muted { color: var(--text-muted); }
+
+/* ========== Lobby ========== */
+.lobby-page h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+.create-game-form {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: var(--bg-light);
+  padding: 1.2rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: var(--neu-shadow);
+}
+.create-game-form label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.create-game-form select {
+  padding: 0.5rem 0.7rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  box-shadow: var(--neu-inset);
+  outline: none;
+  cursor: pointer;
+}
+
+/* ========== Game Table ========== */
+.game-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+.game-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  text-align: left;
+}
+.game-table td {
+  padding: 0.8rem 1rem;
+  background: var(--bg-light);
+}
+.game-table tr td:first-child { border-radius: 12px 0 0 12px; }
+.game-table tr td:last-child { border-radius: 0 12px 12px 0; }
+.game-table tbody tr {
+  box-shadow: var(--neu-flat);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.game-table tbody tr:hover {
+  box-shadow: var(--neu-shadow-sm);
+  transform: translateY(-1px);
+}
+
+/* ========== Game Page ========== */
+.game-page { padding-top: 0.5rem; }
+.waiting-banner {
+  text-align: center;
+  padding: 1.2rem;
+  background: var(--bg-light);
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--neu-shadow);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.game-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+@media (max-width: 700px) {
+  .game-layout { flex-direction: column; align-items: center; }
+}
+
+/* ========== Board ========== */
+.go-board {
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: var(--neu-shadow);
+}
+
+/* ========== Game Info Panel ========== */
+.game-info {
+  min-width: 220px;
+  background: var(--bg-light);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--neu-shadow);
+}
+.players {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.player {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: var(--neu-inset);
+  transition: all 0.25s;
+}
+.player.active {
+  box-shadow: var(--neu-flat);
+  background: var(--surface);
+  border-left: 3px solid var(--primary);
+}
+.stone-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+}
+.black-stone { background: radial-gradient(circle at 35% 35%, #444, #111); }
+.white-stone { background: radial-gradient(circle at 35% 35%, #fff, #ccc); }
+.captures {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.turn-indicator {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: var(--neu-inset);
+  font-size: 0.95rem;
+}
+.game-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+.game-actions .btn { flex: 1; text-align: center; }
+
+.game-result {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: var(--neu-inset);
+}
+.game-result h3 {
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========== Rules Page ========== */
+.rules-page { max-width: 700px; margin: 0 auto; }
+.rules-page h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+.rules-section {
+  margin-bottom: 1.5rem;
+  background: var(--bg-light);
+  border-radius: 16px;
+  padding: 1.5rem 1.8rem;
+  box-shadow: var(--neu-shadow);
+}
+.rules-section h3 {
+  margin-bottom: 0.6rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+.rules-section p { line-height: 1.7; color: var(--text-muted); }
+.rules-section ol, .rules-section ul {
+  padding-left: 1.2rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+.rules-section li { margin-bottom: 0.3rem; }
+.rules-section strong { color: var(--text); }
+.board-sizes {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.8rem;
+}
+.board-size-card {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: var(--neu-inset);
+}
+.board-size-card strong {
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.board-size-card p { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem; }
+@media (max-width: 600px) {
+  .board-sizes { flex-direction: column; }
+}

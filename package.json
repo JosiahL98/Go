@@ -1,0 +1,11 @@
+{
+  "name": "game-of-go",
+  "private": true,
+  "workspaces": ["server", "client"],
+  "scripts": {
+    "build": "npm run build --workspace=client",
+    "start": "npm run start --workspace=server",
+    "dev:server": "npm run start --workspace=server",
+    "dev:client": "npm run dev --workspace=client"
+  }
+}
