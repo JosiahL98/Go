@@ -6,13 +6,13 @@ const router = Router();
 
 router.use(authenticateToken);
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) {
     return res.status(400).json({ error: 'Invalid user ID' });
   }
-  const user = db.get(
-    'SELECT id, username, wins, losses, created_at FROM users WHERE id = ?',
+  const user = await db.get(
+    'SELECT id, username, wins, losses, created_at FROM users WHERE id = $1',
     [id]
   );
 

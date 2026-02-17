@@ -20,24 +20,25 @@ router.post('/register', async (req, res) => {
     if (!USERNAME_RE.test(username)) {
       return res.status(400).json({ error: 'Username must be 3-20 characters (letters, numbers, _ -)' });
     }
-    // V-07: Stronger password policy; NEW-01: cap at 72 (bcrypt max)
     if (password.length < 8 || password.length > 72) {
       return res.status(400).json({ error: 'Password must be 8-72 characters' });
     }
 
-    const existing = db.get('SELECT id FROM users WHERE username = ?', [username]);
+    const existing = await db.get('SELECT id FROM users WHERE username = $1', [username]);
     if (existing) {
       return res.status(409).json({ error: 'Username already taken' });
     }
 
     const hash = await bcrypt.hash(password, 10);
-    const result = db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash]);
+    const result = await db.run(
+      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
+      [username, hash]
+    );
     const user = { id: result.lastInsertRowid, username };
     const token = generateToken(user);
 
     res.status(201).json({ token, user: { id: user.id, username: user.username } });
   } catch (err) {
-    // V-18: Log internally but never expose details
     console.error('Register error:', err.message);
     res.status(500).json({ error: 'Registration failed' });
   }
@@ -52,12 +53,11 @@ router.post('/login', async (req, res) => {
     if (typeof username !== 'string' || typeof password !== 'string') {
       return res.status(400).json({ error: 'Invalid input' });
     }
-    // NEW-01: Reject oversized passwords before bcrypt.compare
     if (password.length > 72) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const user = db.get('SELECT * FROM users WHERE username = ?', [username]);
+    const user = await db.get('SELECT * FROM users WHERE username = $1', [username]);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }

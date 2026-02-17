@@ -13,7 +13,7 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "socket.io": "^4.8.0",
-    "sql.js": "^1.11.0"
+    "pg": "^8.18.0",
+    "socket.io": "^4.8.0"
   }
 }

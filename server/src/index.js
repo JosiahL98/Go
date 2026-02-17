@@ -10,12 +10,9 @@ import gameRoutes from './routes/games.js';
 import userRoutes from './routes/users.js';
 import handleConnection from './socket/gameHandler.js';
 
-// Ensure data directory exists
-import { mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-mkdirSync(path.join(__dirname, '..', 'data'), { recursive: true });
 
 // Import db to trigger schema creation
 import './db.js';

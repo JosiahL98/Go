@@ -29,7 +29,7 @@ function createRateLimiter() {
 function validateInt(value) {
   if (value === null || value === undefined || value === '' || typeof value === 'boolean') return null;
   const n = Number(value);
-  return Number.isInteger(n) && n >= 0 && n <= 18 ? n : null; // NEW-08: upper bound (max index for 19x19)
+  return Number.isInteger(n) && n >= 0 && n <= 18 ? n : null;
 }
 
 function validateGameId(value) {
@@ -53,7 +53,7 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
-function getOrCreateGame(gameId) {
+async function getOrCreateGame(gameId) {
   if (activeGames.has(gameId)) {
     touchGame(gameId);
     return activeGames.get(gameId).game;
@@ -61,11 +61,10 @@ function getOrCreateGame(gameId) {
 
   if (activeGames.size >= MAX_ACTIVE_GAMES) return null;
 
-  const gameRow = db.get('SELECT * FROM games WHERE id = ?', [gameId]);
+  const gameRow = await db.get('SELECT * FROM games WHERE id = $1', [gameId]);
   if (!gameRow) return null;
 
-  const moves = db.all('SELECT * FROM moves WHERE game_id = ? ORDER BY move_number', [gameId]);
-  // NEW-04: Pass player IDs for correct color assignment
+  const moves = await db.all('SELECT * FROM moves WHERE game_id = $1 ORDER BY move_number', [gameId]);
   const game = GoGame.fromMoves(gameRow.board_size, gameRow.komi, moves, gameRow.black_id, gameRow.white_id);
   activeGames.set(gameId, { game, lastActivity: Date.now() });
   return game;
@@ -80,7 +79,6 @@ function getPlayerColor(gameRow, userId) {
 export default function handleConnection(socket, io) {
   const user = socket.user;
 
-  // NEW-02: Attach rate limiter to each socket
   const rateLimitCheck = createRateLimiter();
 
   function rateLimit() {
@@ -91,26 +89,26 @@ export default function handleConnection(socket, io) {
     return true;
   }
 
-  socket.on('join-game', (data) => {
+  socket.on('join-game', async (data) => {
     if (!rateLimit()) return;
 
     const gameId = validateGameId(data?.gameId);
     if (!gameId) return socket.emit('error', { message: 'Invalid game ID' });
 
-    const gameRow = db.get(`
+    const gameRow = await db.get(`
       SELECT g.*, b.username as black_username, w.username as white_username
       FROM games g
       LEFT JOIN users b ON g.black_id = b.id
       LEFT JOIN users w ON g.white_id = w.id
-      WHERE g.id = ?
+      WHERE g.id = $1
     `, [gameId]);
 
     if (!gameRow) return socket.emit('error', { message: 'Game not found' });
 
     // V-06: Atomic join with WHERE preconditions to prevent race condition
     if (gameRow.status === 'waiting' && gameRow.black_id !== user.id && !gameRow.white_id) {
-      const result = db.run(
-        'UPDATE games SET white_id = ?, status = ? WHERE id = ? AND status = ? AND white_id IS NULL',
+      const result = await db.run(
+        'UPDATE games SET white_id = $1, status = $2 WHERE id = $3 AND status = $4 AND white_id IS NULL',
         [user.id, 'active', gameId, 'waiting']
       );
 
@@ -125,7 +123,7 @@ export default function handleConnection(socket, io) {
           color: WHITE,
         });
       } else {
-        const fresh = db.get('SELECT * FROM games WHERE id = ?', [gameId]);
+        const fresh = await db.get('SELECT * FROM games WHERE id = $1', [gameId]);
         if (fresh) {
           gameRow.white_id = fresh.white_id;
           gameRow.status = fresh.status;
@@ -136,7 +134,7 @@ export default function handleConnection(socket, io) {
     socket.join(`game:${gameId}`);
     socket.gameId = gameId;
 
-    const game = getOrCreateGame(gameId);
+    const game = await getOrCreateGame(gameId);
     if (!game) return socket.emit('error', { message: 'Failed to load game' });
 
     const state = game.getState();
@@ -150,7 +148,7 @@ export default function handleConnection(socket, io) {
     });
   });
 
-  socket.on('place-stone', (data) => {
+  socket.on('place-stone', async (data) => {
     if (!rateLimit()) return;
 
     const gameId = validateGameId(data?.gameId);
@@ -160,7 +158,7 @@ export default function handleConnection(socket, io) {
       return socket.emit('error', { message: 'Invalid input' });
     }
 
-    const gameRow = db.get('SELECT * FROM games WHERE id = ?', [gameId]);
+    const gameRow = await db.get('SELECT * FROM games WHERE id = $1', [gameId]);
     if (!gameRow || gameRow.status !== 'active') {
       return socket.emit('error', { message: 'Game is not active' });
     }
@@ -168,10 +166,9 @@ export default function handleConnection(socket, io) {
     const color = getPlayerColor(gameRow, user.id);
     if (!color) return socket.emit('error', { message: 'You are not in this game' });
 
-    const game = getOrCreateGame(gameId);
+    const game = await getOrCreateGame(gameId);
     if (!game) return socket.emit('error', { message: 'Game not found' });
 
-    // V-05: Server-side turn validation (defense in depth)
     if (game.currentPlayer !== color) {
       return socket.emit('error', { message: 'Not your turn' });
     }
@@ -182,9 +179,9 @@ export default function handleConnection(socket, io) {
     }
 
     const moveNumber = game.moveHistory.length;
-    db.run(`
+    await db.run(`
       INSERT INTO moves (game_id, move_number, player_id, x, y, is_pass, captured)
-      VALUES (?, ?, ?, ?, ?, 0, ?)
+      VALUES ($1, $2, $3, $4, $5, 0, $6)
     `, [gameId, moveNumber, user.id, x, y, JSON.stringify(result.captured)]);
 
     touchGame(gameId);
@@ -194,13 +191,13 @@ export default function handleConnection(socket, io) {
     });
   });
 
-  socket.on('pass', (data) => {
+  socket.on('pass', async (data) => {
     if (!rateLimit()) return;
 
     const gameId = validateGameId(data?.gameId);
     if (!gameId) return socket.emit('error', { message: 'Invalid game ID' });
 
-    const gameRow = db.get('SELECT * FROM games WHERE id = ?', [gameId]);
+    const gameRow = await db.get('SELECT * FROM games WHERE id = $1', [gameId]);
     if (!gameRow || gameRow.status !== 'active') {
       return socket.emit('error', { message: 'Game is not active' });
     }
@@ -208,7 +205,7 @@ export default function handleConnection(socket, io) {
     const color = getPlayerColor(gameRow, user.id);
     if (!color) return socket.emit('error', { message: 'You are not in this game' });
 
-    const game = getOrCreateGame(gameId);
+    const game = await getOrCreateGame(gameId);
     if (!game) return socket.emit('error', { message: 'Game not found' });
 
     if (game.currentPlayer !== color) {
@@ -221,9 +218,9 @@ export default function handleConnection(socket, io) {
     }
 
     const moveNumber = game.moveHistory.length;
-    db.run(`
+    await db.run(`
       INSERT INTO moves (game_id, move_number, player_id, is_pass)
-      VALUES (?, ?, ?, 1)
+      VALUES ($1, $2, $3, 1)
     `, [gameId, moveNumber, user.id]);
 
     touchGame(gameId);
@@ -231,17 +228,17 @@ export default function handleConnection(socket, io) {
     io.to(`game:${gameId}`).emit('player-passed', { color });
 
     if (result.gameOver) {
-      finishGame(gameId, gameRow, game, result, io);
+      await finishGame(gameId, gameRow, game, result, io);
     }
   });
 
-  socket.on('resign', (data) => {
+  socket.on('resign', async (data) => {
     if (!rateLimit()) return;
 
     const gameId = validateGameId(data?.gameId);
     if (!gameId) return socket.emit('error', { message: 'Invalid game ID' });
 
-    const gameRow = db.get('SELECT * FROM games WHERE id = ?', [gameId]);
+    const gameRow = await db.get('SELECT * FROM games WHERE id = $1', [gameId]);
     if (!gameRow || gameRow.status !== 'active') {
       return socket.emit('error', { message: 'Game is not active' });
     }
@@ -249,7 +246,7 @@ export default function handleConnection(socket, io) {
     const color = getPlayerColor(gameRow, user.id);
     if (!color) return socket.emit('error', { message: 'You are not in this game' });
 
-    const game = getOrCreateGame(gameId);
+    const game = await getOrCreateGame(gameId);
     if (!game) return socket.emit('error', { message: 'Game not found' });
 
     const result = game.resign(color);
@@ -257,7 +254,7 @@ export default function handleConnection(socket, io) {
       return socket.emit('error', { message: result.error });
     }
 
-    finishGame(gameId, gameRow, game, result, io);
+    await finishGame(gameId, gameRow, game, result, io);
   });
 
   socket.on('disconnect', () => {
@@ -265,20 +262,20 @@ export default function handleConnection(socket, io) {
   });
 }
 
-function finishGame(gameId, gameRow, game, result, io) {
+async function finishGame(gameId, gameRow, game, result, io) {
   const winnerId = result.winner === BLACK ? gameRow.black_id :
                    result.winner === WHITE ? gameRow.white_id : null;
 
-  db.run(`
-    UPDATE games SET status = 'finished', winner_id = ?, result = ?,
-      board_state = ?, finished_at = datetime('now')
-    WHERE id = ?
+  await db.run(`
+    UPDATE games SET status = 'finished', winner_id = $1, result = $2,
+      board_state = $3, finished_at = NOW()
+    WHERE id = $4
   `, [winnerId, result.result, JSON.stringify(game.board.toJSON()), gameId]);
 
   if (winnerId) {
     const loserId = winnerId === gameRow.black_id ? gameRow.white_id : gameRow.black_id;
-    db.run('UPDATE users SET wins = wins + 1 WHERE id = ?', [winnerId]);
-    db.run('UPDATE users SET losses = losses + 1 WHERE id = ?', [loserId]);
+    await db.run('UPDATE users SET wins = wins + 1 WHERE id = $1', [winnerId]);
+    await db.run('UPDATE users SET losses = losses + 1 WHERE id = $1', [loserId]);
   }
 
   io.to(`game:${gameId}`).emit('game-over', {
@@ -292,21 +289,19 @@ function finishGame(gameId, gameRow, game, result, io) {
 }
 
 // V-22 + NEW-13: Cleanup stale waiting games in DB and memory
-export function cleanupStaleGames() {
-  // Get IDs of games being cancelled before updating
-  const stale = db.all(`
+export async function cleanupStaleGames() {
+  const stale = await db.all(`
     SELECT id FROM games
     WHERE status = 'waiting'
-    AND created_at < datetime('now', '-30 minutes')
+    AND created_at < NOW() - INTERVAL '30 minutes'
   `);
 
   if (stale.length > 0) {
-    db.run(`
+    await db.run(`
       UPDATE games SET status = 'cancelled'
       WHERE status = 'waiting'
-      AND created_at < datetime('now', '-30 minutes')
+      AND created_at < NOW() - INTERVAL '30 minutes'
     `);
-    // Also clear from in-memory map
     for (const row of stale) {
       activeGames.delete(row.id);
     }

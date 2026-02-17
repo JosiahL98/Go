@@ -7,7 +7,8 @@
       "Bash(npx vite build:*)",
       "Bash(npx kill-port:*)",
       "Bash(taskkill:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }
